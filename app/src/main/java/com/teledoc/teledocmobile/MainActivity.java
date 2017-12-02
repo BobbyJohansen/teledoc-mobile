@@ -4,23 +4,36 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.Button;
 
-import java.util.List;
+import com.google.gson.Gson;
+import com.teledoc.common.communication.TeleDocMessage;
+import com.teledoc.teledocmobile.communication.MessageService;
+
 import java.util.UUID;
 
-import eu.hgross.blaubot.android.BlaubotAndroidFactory;
-import eu.hgross.blaubot.core.Blaubot;
-import eu.hgross.blaubot.core.BlaubotFactory;
-import eu.hgross.blaubot.core.IBlaubotDevice;
-import eu.hgross.blaubot.core.ILifecycleListener;
 import eu.hgross.blaubot.messaging.BlaubotMessage;
-import eu.hgross.blaubot.messaging.IBlaubotChannel;
 import eu.hgross.blaubot.messaging.IBlaubotMessageListener;
 
 public class MainActivity extends AppCompatActivity {
     public static final UUID TELEDOC_UUID = UUID.fromString("3ef00e98-a42e-4d71-acc7-c9d5bde24c90");
 
-    public Blaubot mBlaubot;
+
     public Button btnMessage;
+    private MessageService messageService = MessageService.getInstance(TELEDOC_UUID);
+
+    //Our message Listener
+    private class MessageListener implements IBlaubotMessageListener{
+        @Override
+        public void onMessage(BlaubotMessage message) {
+            String msg = new String(message.getPayload());
+            System.out.println("msg received: " + msg);
+            TeleDocMessage teleDocMessage = deserializeMessage(msg);
+        }
+
+        private TeleDocMessage deserializeMessage(String message) {
+            Gson gson = new Gson;
+             TeleDocMessage teleDocMessage = gson.fromJson(message, TeleDocMessage.class);
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,43 +41,12 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         btnMessage = (Button)findViewById(R.id.btnMessage);
 
-        mBlaubot = BlaubotAndroidFactory.createEthernetBlaubot(TELEDOC_UUID);
-
-        Thread t = new Thread(() -> {
-            while (true) {
-                Blaubot bb = mBlaubot;
-                try {
-                    if (bb != null) {
-                        List<IBlaubotDevice> devices = bb.getConnectionManager().getConnectedDevices();
-                        devices.add(0, bb.getOwnDevice());
-                        int i = 0;
-                        System.out.println("Devices:");
-                        for (IBlaubotDevice d : devices) {
-                            System.out.println("dev " + i + ": " + d);
-                            i++;
-                        }
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                try {
-                    Thread.sleep(10000);
-                } catch (Exception e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                    return;
-                }
-            }
-        });
-        t.setDaemon(true);
-        t.start();
-
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        startNetworking();
+        messageService.startNetworking(1, new MessageListener());
 //        mBlaubot.registerReceivers(this);
 //        mBlaubot.setContext(this);
 //        mBlaubot.onResume(this);
@@ -79,61 +61,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onStop() {
-        mBlaubot.stopBlaubot();
+        messageService.stopNetworking();
         super.onStop();
-    }
-
-    public void startNetworking() {
-        mBlaubot.startBlaubot();
-
-        // create the channel
-        final IBlaubotChannel channel = mBlaubot.createChannel((short)1);
-
-        btnMessage.setOnClickListener((evt) -> {
-            channel.publish(("Android msg " + System.currentTimeMillis()).getBytes());
-        });
-
-        channel.publish("Hello world!".getBytes());
-
-        System.out.println("subscribing");
-        channel.subscribe(new IBlaubotMessageListener() {
-            @Override
-            public void onMessage(BlaubotMessage message) {
-                String msg = new String(message.getPayload());
-                System.out.println("msg received: " + msg);
-            }
-        });
-
-        mBlaubot.addLifecycleListener(new ILifecycleListener() {
-            @Override
-            public void onDisconnected() {
-                System.out.println("onDisconnected");
-            }
-
-            @Override
-            public void onDeviceLeft(IBlaubotDevice blaubotDevice) {
-                System.out.println("onDeviceLeft " + blaubotDevice);
-            }
-
-            @Override
-            public void onDeviceJoined(IBlaubotDevice blaubotDevice) {
-                System.out.println("onDeviceJoined " + blaubotDevice);
-            }
-
-            @Override
-            public void onConnected() {
-                System.out.println("onConnected");
-            }
-
-            @Override
-            public void onPrinceDeviceChanged(IBlaubotDevice oldPrince, IBlaubotDevice newPrince) {
-                System.out.println("onPrinceDeviceChanged " + oldPrince + " -> " + newPrince);
-            }
-
-            @Override
-            public void onKingDeviceChanged(IBlaubotDevice oldKing, IBlaubotDevice newKing) {
-                System.out.println("onKingDeviceChanged " + oldKing + " -> " + newKing);
-            }
-        });
     }
 }
