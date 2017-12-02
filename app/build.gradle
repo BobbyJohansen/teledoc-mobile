@@ -25,6 +25,14 @@ android {
         pickFirst 'META-INF/NOTICE.txt'
         pickFirst 'META-INF/INDEX.LIST'
     }
+    lintOptions {
+        abortOnError false
+    }
+
+}
+
+repositories {
+    mavenLocal()
 }
 
 dependencies {
@@ -35,5 +43,9 @@ dependencies {
     androidTestImplementation 'com.android.support.test:runner:1.0.1'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
 
+
     compile 'eu.hgross:blaubot-android:2+'
+    compile group: 'com.google.code.gson', name: 'gson', version: '2.8.2'
+    compile 'com.teledoc:teledoc-common:0.0.1-SNAPSHOT'
+
 }
