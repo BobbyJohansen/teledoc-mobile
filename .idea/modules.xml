@@ -2,14 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/app/src/androidTest/androidTest.iml" filepath="$PROJECT_DIR$/app/src/androidTest/androidTest.iml" />
-      <module fileurl="file://$PROJECT_DIR$/app/build/generated/source/buildConfig/buildConfig.iml" filepath="$PROJECT_DIR$/app/build/generated/source/buildConfig/buildConfig.iml" />
-      <module fileurl="file://$PROJECT_DIR$/app/build/intermediates/manifests/full/debug/debug.iml" filepath="$PROJECT_DIR$/app/build/intermediates/manifests/full/debug/debug.iml" />
-      <module fileurl="file://$PROJECT_DIR$/app/src/main/main.iml" filepath="$PROJECT_DIR$/app/src/main/main.iml" />
-      <module fileurl="file://$PROJECT_DIR$/app/build/generated/source/r/r.iml" filepath="$PROJECT_DIR$/app/build/generated/source/r/r.iml" />
-      <module fileurl="file://$PROJECT_DIR$/app/build/intermediates/manifests/full/release/release.iml" filepath="$PROJECT_DIR$/app/build/intermediates/manifests/full/release/release.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/teledoc-mobile.iml" filepath="$PROJECT_DIR$/.idea/modules/teledoc-mobile.iml" />
-      <module fileurl="file://$PROJECT_DIR$/app/src/test/test.iml" filepath="$PROJECT_DIR$/app/src/test/test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/TeledocMobile.iml" filepath="$PROJECT_DIR$/TeledocMobile.iml" />
+      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/teledocwatch/teledocwatch.iml" filepath="$PROJECT_DIR$/teledocwatch/teledocwatch.iml" />
     </modules>
   </component>
 </project>

@@ -50,5 +50,4 @@ dependencies {
     api ('com.teledoc:teledoc-common:0.0.1-SNAPSHOT') {
         exclude group: 'org.eclipse.persistence', module: 'eclipselink'
     }
-
 }
