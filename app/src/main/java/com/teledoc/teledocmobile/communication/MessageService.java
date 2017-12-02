@@ -12,7 +12,6 @@ import eu.hgross.blaubot.android.BlaubotAndroidFactory;
 import eu.hgross.blaubot.core.Blaubot;
 import eu.hgross.blaubot.core.IBlaubotDevice;
 import eu.hgross.blaubot.core.ILifecycleListener;
-import eu.hgross.blaubot.messaging.BlaubotMessage;
 import eu.hgross.blaubot.messaging.IBlaubotChannel;
 import eu.hgross.blaubot.messaging.IBlaubotMessageListener;
 
@@ -81,7 +80,7 @@ public class MessageService {
         final IBlaubotChannel channel = mBlaubot.createChannel((short)channelId);
         channelMap.put(channelId, channel);
 
-        channel.publish("Hello world!".getBytes());
+//        channel.publish("Hello world!".getBytes());
 
         //Start listening to the channel we are talking over
         System.out.println("subscribing");
@@ -124,7 +123,7 @@ public class MessageService {
         IBlaubotChannel channel = null;
         try {
             channel = channelMap.get(channelId);
-            channel.publish(("Android msg " + System.currentTimeMillis()).getBytes());
+//            channel.publish(("Android msg " + System.currentTimeMillis()).getBytes());
             channel.publish(serialize(message).getBytes());
         } catch (Exception e) {
             System.out.println("Could not find channel to send message to on channel: " + channelId);
