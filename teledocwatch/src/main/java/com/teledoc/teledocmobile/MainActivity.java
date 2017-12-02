@@ -1,4 +1,4 @@
-package com.teledoc.teledocwatch;
+package com.teledoc.teledocmobile;
 
 import android.Manifest;
 import android.content.Context;
@@ -79,6 +79,7 @@ public class MainActivity extends WearableActivity implements SensorEventListene
 
     @Override
     public void onSensorChanged(SensorEvent event) {
+        Log.d(TAG, "read sensor");
         TeleDocMessage tdm = new TeleDocMessage();
         tdm.setDataType(DataType.HEART_RATE);
         ArrayList<Double> data = new ArrayList<>(event.values.length);
@@ -117,6 +118,8 @@ public class MainActivity extends WearableActivity implements SensorEventListene
                 // Request access only to the Wearable API
                 .addApi(Wearable.API)
                 .build();
+
+        mGoogleApiClient.connect();
     }
 
     public void sendData(byte[] data) {
@@ -134,6 +137,8 @@ public class MainActivity extends WearableActivity implements SensorEventListene
                                 if (!sendMessageResult.getStatus().isSuccess()) {
                                     // Failed to send message
                                     Log.e(TAG, "Failed to send message - " + sendMessageResult.getStatus().getStatusMessage());
+                                } else {
+                                    Log.d(TAG, "Successfully sent message");
                                 }
                             }
                         }

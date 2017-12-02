@@ -2,9 +2,15 @@ package com.teledoc.teledocmobile;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.wearable.MessageApi;
+import com.google.android.gms.wearable.MessageEvent;
+import com.google.android.gms.wearable.Wearable;
 import com.google.gson.Gson;
 import com.teledoc.common.communication.DataType;
 import com.teledoc.common.communication.TeleDocMessage;
@@ -23,11 +29,16 @@ import eu.hgross.blaubot.messaging.BlaubotMessage;
 import eu.hgross.blaubot.messaging.IBlaubotMessageListener;
 
 public class MainActivity extends AppCompatActivity {
-    public static final UUID TELEDOC_UUID = UUID.fromString("3ef00e98-a42e-4d71-acc7-c9d5bde24c90");
+    private static final String TAG = "MainActivity";
 
+    public static final Gson gson = new Gson();
+
+    public static final UUID TELEDOC_UUID = UUID.fromString("3ef00e98-a42e-4d71-acc7-c9d5bde24c90");
+    public static final UUID INSTANCE_UUID = UUID.randomUUID();
 
     public Button btnMessage;
-    private MessageService messageService = MessageService.getInstance(TELEDOC_UUID);
+    private MessageService messageService = MessageService.getInstance(TELEDOC_UUID); //TODO Save locally?
+
 
     //Our message Listener
     private class MessageListener implements IBlaubotMessageListener{
@@ -68,6 +79,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        listenToWatch();
     }
 
     @Override
@@ -92,4 +104,46 @@ public class MainActivity extends AppCompatActivity {
         super.onStop();
     }
 
+    public void listenToWatch() {
+        //TODO I don't yet start/stop the listeners with the activity lifecycle, which would be bad-ish in production.
+        GoogleApiClient mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
+                    @Override
+                    public void onConnected(Bundle connectionHint) {
+                        Log.d(TAG, "onConnected: " + connectionHint);
+                        // Now you can use the Data Layer API
+                    }
+                    @Override
+                    public void onConnectionSuspended(int cause) {
+                        Log.d(TAG, "onConnectionSuspended: " + cause);
+                    }
+                })
+                .addOnConnectionFailedListener(new GoogleApiClient.OnConnectionFailedListener() {
+                    @Override
+                    public void onConnectionFailed(ConnectionResult result) {
+                        Log.d(TAG, "onConnectionFailed: " + result);
+                    }
+                })
+                // Request access only to the Wearable API
+                .addApi(Wearable.API)
+                .build();
+        mGoogleApiClient.connect();
+
+        Wearable.MessageApi.addListener(mGoogleApiClient, new MessageApi.MessageListener() {
+            @Override
+            public void onMessageReceived(MessageEvent messageEvent) {
+                String msgStr = new String(messageEvent.getData());
+                Log.d(TAG, "Received msg: " + msgStr);
+                if ("/sensor/data".equals(messageEvent.getPath())) {
+                    TeleDocMessage msg = gson.fromJson(msgStr, TeleDocMessage.class);
+                    msg.setPerson(INSTANCE_UUID);
+                    messageService.send(1, msg);
+                }
+            }
+        }).setResultCallback((r) -> {
+            if (!r.isSuccess()) {
+                Log.e(TAG, "Unable to register watch listener: " + r.getStatusMessage());
+            }
+        });
+    }
 }
