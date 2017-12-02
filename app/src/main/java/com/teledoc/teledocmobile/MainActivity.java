@@ -29,6 +29,36 @@ public class MainActivity extends AppCompatActivity {
         btnMessage = (Button)findViewById(R.id.btnMessage);
 
         mBlaubot = BlaubotAndroidFactory.createEthernetBlaubot(TELEDOC_UUID);
+
+        Thread t = new Thread(() -> {
+            while (true) {
+                Blaubot bb = mBlaubot;
+                try {
+                    if (bb != null) {
+                        List<IBlaubotDevice> devices = bb.getConnectionManager().getConnectedDevices();
+                        devices.add(0, bb.getOwnDevice());
+                        int i = 0;
+                        System.out.println("Devices:");
+                        for (IBlaubotDevice d : devices) {
+                            System.out.println("dev " + i + ": " + d);
+                            i++;
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                try {
+                    Thread.sleep(10000);
+                } catch (Exception e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                    return;
+                }
+            }
+        });
+        t.setDaemon(true);
+        t.start();
+
     }
 
     @Override
@@ -73,28 +103,6 @@ public class MainActivity extends AppCompatActivity {
                 System.out.println("msg received: " + msg);
             }
         });
-
-        Thread t = new Thread(() -> {
-            while (true) {
-                List<IBlaubotDevice> devices = mBlaubot.getConnectionManager().getConnectedDevices();
-                devices.add(0, mBlaubot.getOwnDevice());
-                int i = 0;
-                System.out.println("Devices:");
-                for (IBlaubotDevice d : devices) {
-                    System.out.println("dev " + i + ": " + d);
-                    i++;
-                }
-                try {
-                    Thread.sleep(10000);
-                } catch (Exception e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                    return;
-                }
-            }
-        });
-        t.setDaemon(true);
-        t.start();
 
         mBlaubot.addLifecycleListener(new ILifecycleListener() {
             @Override
