@@ -137,7 +137,11 @@ public class MainActivity extends AppCompatActivity {
                 if ("/sensor/data".equals(messageEvent.getPath())) {
                     TeleDocMessage msg = gson.fromJson(msgStr, TeleDocMessage.class);
                     msg.setPerson(INSTANCE_UUID);
-                    messageService.send(1, msg);
+                    if (msg.getDataType() == DataType.PPG) {
+                        //TODO Do processing
+                    } else {
+                        messageService.send(1, msg);
+                    }
                 }
             }
         }).setResultCallback((r) -> {

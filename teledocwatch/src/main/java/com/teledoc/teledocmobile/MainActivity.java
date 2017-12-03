@@ -42,6 +42,7 @@ public class MainActivity extends WearableActivity implements SensorEventListene
     private GoogleApiClient mGoogleApiClient;
     private SensorManager mSensorManager;
     private Sensor mSensorHeartRate;
+    private Sensor mSensorPpg;
     private TextView mTextView;
 
     @Override
@@ -58,6 +59,7 @@ public class MainActivity extends WearableActivity implements SensorEventListene
             mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
 //            List<Sensor> deviceSensors = mSensorManager.getSensorList(Sensor.TYPE_ALL);
             mSensorHeartRate = mSensorManager.getDefaultSensor(Sensor.TYPE_HEART_RATE);
+            mSensorPpg = mSensorManager.getSensorList(Sensor.TYPE_ALL).stream().filter(s -> "HR PPG SENSOR".equalsIgnoreCase(s.getName())).findAny().get();
         } else {
             this.finish();
         }
@@ -68,7 +70,7 @@ public class MainActivity extends WearableActivity implements SensorEventListene
     @Override
     protected void onResume() {
         super.onResume();
-        mSensorManager.registerListener(this, mSensorHeartRate, SensorManager.SENSOR_DELAY_NORMAL);
+        mSensorManager.registerListener(this, mSensorPpg, SensorManager.SENSOR_DELAY_NORMAL);
     }
 
     @Override
@@ -77,11 +79,26 @@ public class MainActivity extends WearableActivity implements SensorEventListene
         super.onPause();
     }
 
+    private volatile long timeStart = -1;
+    private volatile int count = 0;
+
     @Override
     public void onSensorChanged(SensorEvent event) {
-        Log.d(TAG, "read sensor");
+        if (timeStart < 0) {
+            timeStart = System.currentTimeMillis();
+        }
+        count++;
+        long time = System.currentTimeMillis();
+        if (count % 100 == 0) {
+            Log.d(TAG, "count " + count + " in " + (time - timeStart));
+        }
+//        if (1==1) {
+//            return;
+//        }
+//
+//        Log.d(TAG, "read sensor");
         TeleDocMessage tdm = new TeleDocMessage();
-        tdm.setDataType(DataType.HEART_RATE);
+        tdm.setDataType(DataType.PPG);
         ArrayList<Double> data = new ArrayList<>(event.values.length);
         for (float f : event.values) {
             data.add((double)f);
@@ -138,7 +155,7 @@ public class MainActivity extends WearableActivity implements SensorEventListene
                                     // Failed to send message
                                     Log.e(TAG, "Failed to send message - " + sendMessageResult.getStatus().getStatusMessage());
                                 } else {
-                                    Log.d(TAG, "Successfully sent message");
+                                    //Log.d(TAG, "Successfully sent message");
                                 }
                             }
                         }
