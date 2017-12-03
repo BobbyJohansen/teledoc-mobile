@@ -71,6 +71,7 @@ public class MainActivity extends WearableActivity implements SensorEventListene
     protected void onResume() {
         super.onResume();
         mSensorManager.registerListener(this, mSensorPpg, SensorManager.SENSOR_DELAY_NORMAL);
+        mSensorManager.registerListener(this, mSensorHeartRate, SensorManager.SENSOR_DELAY_NORMAL);
     }
 
     @Override
@@ -84,28 +85,40 @@ public class MainActivity extends WearableActivity implements SensorEventListene
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        if (timeStart < 0) {
-            timeStart = System.currentTimeMillis();
-        }
-        count++;
-        long time = System.currentTimeMillis();
-        if (count % 100 == 0) {
-            Log.d(TAG, "count " + count + " in " + (time - timeStart));
-        }
+        if (event.sensor.getType() == Sensor.TYPE_HEART_RATE) {
+            TeleDocMessage tdm = new TeleDocMessage();
+            tdm.setDataType(DataType.HEART_RATE);
+            ArrayList<Double> data = new ArrayList<>(event.values.length);
+            for (float f : event.values) {
+                data.add((double) f);
+            }
+            tdm.setData(data);
+            //TODO Make more asynchronous?
+            sendData(gson.toJson(tdm).getBytes());
+        } else {
+            if (timeStart < 0) {
+                timeStart = System.currentTimeMillis();
+            }
+            count++;
+            long time = System.currentTimeMillis();
+            if (count % 100 == 0) {
+                Log.d(TAG, "count " + count + " in " + (time - timeStart));
+            }
 //        if (1==1) {
 //            return;
 //        }
 //
 //        Log.d(TAG, "read sensor");
-        TeleDocMessage tdm = new TeleDocMessage();
-        tdm.setDataType(DataType.PPG);
-        ArrayList<Double> data = new ArrayList<>(event.values.length);
-        for (float f : event.values) {
-            data.add((double)f);
+            TeleDocMessage tdm = new TeleDocMessage();
+            tdm.setDataType(DataType.PPG);
+            ArrayList<Double> data = new ArrayList<>(event.values.length);
+            for (float f : event.values) {
+                data.add((double) f);
+            }
+            tdm.setData(data);
+            //TODO Make more asynchronous?
+            sendData(gson.toJson(tdm).getBytes());
         }
-        tdm.setData(data);
-        //TODO Make more asynchronous?
-        sendData(gson.toJson(tdm).getBytes());
     }
 
     @Override

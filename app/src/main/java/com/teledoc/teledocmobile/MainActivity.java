@@ -139,6 +139,7 @@ public class MainActivity extends AppCompatActivity {
                     msg.setPerson(INSTANCE_UUID);
                     if (msg.getDataType() == DataType.PPG) {
                         //TODO Do processing
+                        messageService.send(1, msg);
                     } else {
                         messageService.send(1, msg);
                     }
